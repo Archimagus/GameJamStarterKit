@@ -26,8 +26,9 @@ public class MenuStack : ScriptableObject
 		menu.SetActive(true);
 		_gameTime.MenuPause = true;
 	}
-	public void CloseMenu()
+	public void CloseMenu(out int menusClosed)
 	{
+		menusClosed = 0;
 		if (!_menus.Any())
 			return;
 
@@ -36,6 +37,7 @@ public class MenuStack : ScriptableObject
 		{
 			menu = _menus.Pop();
 			menu.MenuItem.SetActive(false);
+			menusClosed++;
 			if (!_menus.Any())
 			{
 				_gameTime.MenuPause = false;
@@ -45,6 +47,10 @@ public class MenuStack : ScriptableObject
 				_menus.Peek().MenuItem.SetActive(true);
 			}
 		} while (!menu.Independent);
+	}
+	public void CloseMenu()
+	{
+		CloseMenu(out _);
 	}
 	private class MenuStackItem
 	{
