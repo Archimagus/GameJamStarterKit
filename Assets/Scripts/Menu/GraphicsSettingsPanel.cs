@@ -27,6 +27,7 @@ public class GraphicsSettingsPanel : MonoBehaviour
 				_windowedToggle.isOn = true;
 				break;
 		}
+		_qualityOptionsHost.transform.DestroyChildren();
 		for (var i = 0; i < QualitySettings.names.Length; i++)
 		{
 			int settingLevel = i;
@@ -44,12 +45,7 @@ public class GraphicsSettingsPanel : MonoBehaviour
 	private void updateResolutionsDialogue()
 	{
 		var parent = _resolutionOptionsHost.transform;
-		while (parent.childCount > 0)
-		{
-			var ch = parent.GetChild(0);
-			ch.SetParent(null);
-			Destroy(ch);
-		}
+		parent.DestroyChildren();
 
 		void resolutionButtonClicked(Resolution r, bool state)
 		{

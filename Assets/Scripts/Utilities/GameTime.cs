@@ -14,7 +14,7 @@ public class GameTime : ScriptableObject
 	{
 		init();
 	}
-	private	void init()
+	private void init()
 	{
 		_timeScale = 1f;
 		_pause = false;
@@ -43,7 +43,7 @@ public class GameTime : ScriptableObject
 			_pause = value;
 			if (value)
 			{
-				Time.timeScale = 0;
+				setTimeScale(0);
 			}
 			else
 			{
@@ -63,9 +63,16 @@ public class GameTime : ScriptableObject
 		set
 		{
 			_menuPause = value;
-			if (!Pause)
+			if (value)
 			{
-				setTimeScale(TimeScale);
+				setTimeScale(0);
+			}
+			else
+			{
+				if (!Pause)
+				{
+					setTimeScale(TimeScale);
+				}
 			}
 		}
 	}

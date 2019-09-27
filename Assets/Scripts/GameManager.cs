@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
 	
 	private void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.Escape))
+		if (Input.GetButtonDown("Menu"))
 		{
 			if (_gameTime.MenuPause)
 				_menuStack.CloseMenu();
