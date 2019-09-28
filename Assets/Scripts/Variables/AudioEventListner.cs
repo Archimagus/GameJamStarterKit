@@ -2,10 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioEvent : MonoBehaviour
+public class AudioEventListner : GameEventListner
 {
 	public float FadeTime = 1;
 
+	private void OnValidate()
+	{
+		if (Response.GetPersistentEventCount() == 0)
+		{
+#if UNITY_EDITOR
+			var clip = AudioClip.Create("", 1, 1, 44000, false);
+			UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<AudioClip>(Response, PlaySound, clip);
+			DestroyImmediate(clip);
+#endif
+		}
+	}
+	private void blah(DataVariable dv)
+	{
+
+	}
 	public void SetFadeTime (float fadeTime)
 	{
 		FadeTime = fadeTime;
