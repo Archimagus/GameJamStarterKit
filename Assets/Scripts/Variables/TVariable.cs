@@ -26,7 +26,7 @@ public abstract class TVariable<T> : TVariable
 		}
 		set
 		{
-			if (value != null && value.Equals(_currentValue))
+			if (value?.Equals(_currentValue)??false)
 				return;
 			SetValue(value);
 		}
@@ -40,11 +40,6 @@ public abstract class TVariable<T> : TVariable
 
 	protected virtual void OnValidate()
 	{
-		if (_resetOnScene != null)
-		{
-			SceneManager.activeSceneChanged -= sceneManager_activeSceneChanged;
-			SceneManager.activeSceneChanged += sceneManager_activeSceneChanged;
-		}
 		Reset();
 	}
 	private void sceneManager_activeSceneChanged(Scene oldScene, Scene newScene)

@@ -15,7 +15,8 @@ public class AudioPostProcessor : AssetPostprocessor
 		var newClips = new List<AudioClip>();
 		foreach (var path in importedAssets)
 		{
-			if (AssetDatabase.GetMainAssetTypeAtPath(path).IsAssignableFrom(typeof(AudioClip)))
+			var asset = AssetDatabase.GetMainAssetTypeAtPath(path);
+			if (asset?.IsAssignableFrom(typeof(AudioClip))??false)
 			{
 				var name = Path.GetFileNameWithoutExtension(path);
 				// if AudioClips doesn't already contain an entry for the new clip then add it to the list (if we are getting from source control, it might have been added already) 
