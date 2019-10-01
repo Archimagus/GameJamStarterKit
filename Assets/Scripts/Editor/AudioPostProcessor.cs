@@ -73,7 +73,7 @@ public class AudioPostProcessor : AssetPostprocessor
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine("// Auto Generated File, Don't Modify");
-			sb.AppendLine("public enum AudioClips");
+			sb.AppendLine("public enum AudioClips:ulong");
 			sb.AppendLine("{");
 			foreach (AudioClips c in Enum.GetValues(typeof(AudioClips)))
 			{
@@ -84,13 +84,15 @@ public class AudioPostProcessor : AssetPostprocessor
 			}
 			foreach (var clip in newClips)
 			{
-				var fileId = clip.GetInstanceID();
 				var path = AssetDatabase.GetAssetPath(clip);
+				var guid = AssetDatabase.AssetPathToGUID(path);
 				var name = Path.GetFileNameWithoutExtension(path);
 				var directory = Path.GetDirectoryName(path);
 				directory = directory.Substring(directory.LastIndexOf('\\') + 1);
 				if (directory == "Resources")
 					directory = "Default";
+
+				var fileId = BitConverter.ToUInt64(Encoding.ASCII.GetBytes(guid), 0);
 				// make sure the enum doesn't already contain this file. 
 				// An old instance of AudioClips may be loaded because of an error in another scrips caused by removing an audio clip it was referencing
 				if(!Enum.IsDefined(typeof(AudioClips), fileId))
@@ -119,7 +121,7 @@ public class AudioPostProcessor : AssetPostprocessor
 
 		var sb = new StringBuilder();
 		sb.AppendLine("// Auto Generated File, Don't Modify");
-		sb.AppendLine("public enum AudioClips");
+		sb.AppendLine("public enum AudioClips:ulong");
 		sb.AppendLine("{");
 		foreach (string g in guids)
 		{
@@ -127,7 +129,8 @@ public class AudioPostProcessor : AssetPostprocessor
 			var name = Path.GetFileNameWithoutExtension(path);
 			var directory = Path.GetDirectoryName(path);
 			var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
-			var id = clip.GetInstanceID();
+			var bytes = Encoding.ASCII.GetBytes(g);
+			var id = BitConverter.ToUInt64(bytes,0);
 			sb.AppendLine($"\t{name} = {id},");
 			directory = directory.Substring(directory.LastIndexOf('\\') + 1);
 			if (directory == "Resources")
