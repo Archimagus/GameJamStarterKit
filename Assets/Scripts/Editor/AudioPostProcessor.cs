@@ -12,103 +12,116 @@ public class AudioPostProcessor : AssetPostprocessor
 	static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
 		var db = CreateOrGetAudioDatabase();
-		var newClips = new List<AudioClip>();
-		foreach (var path in importedAssets)
+		try
 		{
-			var asset = AssetDatabase.GetMainAssetTypeAtPath(path);
-			if (asset?.IsAssignableFrom(typeof(AudioClip))??false)
+			var newClips = new List<AudioClip>();
+			foreach (var path in importedAssets)
 			{
-				var name = Path.GetFileNameWithoutExtension(path);
-				// if AudioClips doesn't already contain an entry for the new clip then add it to the list (if we are getting from source control, it might have been added already) 
-				if (!Enum.TryParse(name, out AudioClips clip))
+				var asset = AssetDatabase.GetMainAssetTypeAtPath(path);
+				if (asset?.IsAssignableFrom(typeof(AudioClip)) ?? false)
 				{
-					var c = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
-					newClips.Add(c);
+					var name = Path.GetFileNameWithoutExtension(path);
+					// if AudioClips doesn't already contain an entry for the new clip then add it to the list (if we are getting from source control, it might have been added already) 
+					if (!Enum.TryParse(name, out AudioClips clip))
+					{
+						var c = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+						newClips.Add(c);
+					}
 				}
 			}
-		}
 
-		var deletedClips = new HashSet<AudioClips>();
-		foreach (var path in deletedAssets)
-		{
-			string name = Path.GetFileNameWithoutExtension(path);
-			// if AudioClips contains an entry for the deleted clip add it to the list (if we are getting from source control, it might have been removed already) 
-			if (Enum.TryParse(name, out AudioClips clip))
+			var deletedClips = new HashSet<AudioClips>();
+			foreach (var path in deletedAssets)
 			{
-				db.AudioClips.Remove(clip);
-				deletedClips.Add(clip);
-			}
-		}
-
-		foreach (var path in movedAssets)
-		{
-			if (AssetDatabase.GetMainAssetTypeAtPath(path).IsAssignableFrom(typeof(AudioClip)))
-			{
-				var name = Path.GetFileNameWithoutExtension(path);
+				string name = Path.GetFileNameWithoutExtension(path);
+				// if AudioClips contains an entry for the deleted clip add it to the list (if we are getting from source control, it might have been removed already) 
 				if (Enum.TryParse(name, out AudioClips clip))
 				{
+					db.Remove((ulong)clip);
+					deletedClips.Add(clip);
+				}
+			}
+
+			foreach (var path in movedAssets)
+			{
+				if (AssetDatabase.GetMainAssetTypeAtPath(path).IsAssignableFrom(typeof(AudioClip)))
+				{
+					var name = Path.GetFileNameWithoutExtension(path);
+					if (Enum.TryParse(name, out AudioClips clip))
+					{
+						var directory = Path.GetDirectoryName(path);
+						directory = directory.Substring(directory.LastIndexOf('\\') + 1);
+						if (directory == "Resources")
+							directory = "Default";
+
+						if (Enum.TryParse(directory, out SoundType t))
+						{
+							var c = db[clip];
+							if (c != null)
+								c.SoundType = t;
+							else
+								newClips.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(path));
+						}
+						else
+						{
+							// removed from the audio resources folder
+							db.Remove((ulong)clip);
+							deletedClips.Add(clip);
+						}
+					}
+					else
+						newClips.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(path));
+				}
+			}
+
+			if (deletedClips.Any() || newClips.Any())
+			{
+				var sb = new StringBuilder();
+				sb.AppendLine("// Auto Generated File, Don't Modify");
+				sb.AppendLine("public enum AudioClips:ulong");
+				sb.AppendLine("{");
+				foreach (AudioClips c in Enum.GetValues(typeof(AudioClips)))
+				{
+					if (!deletedClips.Contains(c))
+					{
+						sb.AppendLine($"\t{c} = {(long)c},");
+					}
+				}
+				foreach (var clip in newClips)
+				{
+					var path = AssetDatabase.GetAssetPath(clip);
+					var guid = AssetDatabase.AssetPathToGUID(path);
+					var name = Path.GetFileNameWithoutExtension(path);
 					var directory = Path.GetDirectoryName(path);
 					directory = directory.Substring(directory.LastIndexOf('\\') + 1);
 					if (directory == "Resources")
 						directory = "Default";
-					if (Enum.TryParse(directory, out SoundType t))
-					{
-						if (db.AudioClips.ContainsKey(clip))
-							db.AudioClips[clip].SoundType = t;
-						else
-							newClips.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(path));
-					}
-					else
-					{
-						// removed from the audio resources folder
-						db.AudioClips.Remove(clip);
-						deletedClips.Add(clip);
-					}
+
+					var id = BitConverter.ToUInt64(Encoding.ASCII.GetBytes(guid), 0);
+					// make sure the enum doesn't already contain this file. 
+					// An old instance of AudioClips may be loaded because of an error in another scrips caused by removing an audio clip it was referencing
+					if (!Enum.IsDefined(typeof(AudioClips), id))
+						sb.AppendLine($"\t{name} = {id},");
+
+					db.Add(id, clip, (SoundType)Enum.Parse(typeof(SoundType), directory));
 				}
-				else
-					newClips.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(path));
+				sb.Remove(sb.Length - 3, 1);
+				sb.AppendLine("}");
+				var dataPath = Application.dataPath.Replace('/', '\\');
+				dataPath = Path.Combine(dataPath, @"Scripts\Utilities\AudioClips.cs");
+				File.WriteAllText(dataPath, sb.ToString());
+				AssetDatabase.SaveAssets();
+				AssetDatabase.ImportAsset(@"Assets/Scripts/Utilities/AudioClips.cs");
+				AssetDatabase.Refresh();
+				EditorUtility.SetDirty(db);
 			}
 		}
-
-		if (deletedClips.Any() || newClips.Any())
+		catch (Exception exc)
 		{
-			var sb = new StringBuilder();
-			sb.AppendLine("// Auto Generated File, Don't Modify");
-			sb.AppendLine("public enum AudioClips:ulong");
-			sb.AppendLine("{");
-			foreach (AudioClips c in Enum.GetValues(typeof(AudioClips)))
-			{
-				if (!deletedClips.Contains(c))
-				{
-					sb.AppendLine($"\t{c} = {(long)c},");
-				}
-			}
-			foreach (var clip in newClips)
-			{
-				var path = AssetDatabase.GetAssetPath(clip);
-				var guid = AssetDatabase.AssetPathToGUID(path);
-				var name = Path.GetFileNameWithoutExtension(path);
-				var directory = Path.GetDirectoryName(path);
-				directory = directory.Substring(directory.LastIndexOf('\\') + 1);
-				if (directory == "Resources")
-					directory = "Default";
-
-				var fileId = BitConverter.ToUInt64(Encoding.ASCII.GetBytes(guid), 0);
-				// make sure the enum doesn't already contain this file. 
-				// An old instance of AudioClips may be loaded because of an error in another scrips caused by removing an audio clip it was referencing
-				if(!Enum.IsDefined(typeof(AudioClips), fileId))
-					sb.AppendLine($"\t{name} = {fileId},");
-				db.AudioClips.Add((AudioClips)fileId, new AudioClipData(clip, (SoundType)Enum.Parse(typeof(SoundType), directory)));
-			}
-			sb.Remove(sb.Length - 3, 1);
-			sb.AppendLine("}");
-			var dataPath = Application.dataPath.Replace('/', '\\');
-			dataPath = Path.Combine(dataPath, @"Scripts\Utilities\AudioClips.cs");
-			File.WriteAllText(dataPath, sb.ToString());
-			AssetDatabase.SaveAssets();
-			AssetDatabase.ImportAsset(@"Assets/Scripts/Utilities/AudioClips.cs");
-			//AssetDatabase.Refresh();
+			EditorGUIUtility.PingObject(db);
+			Debug.LogError(exc.Message);
 		}
+
 	}
 
 
@@ -117,8 +130,7 @@ public class AudioPostProcessor : AssetPostprocessor
 	{
 		string[] guids = AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio/Resources" });
 		var db = CreateOrGetAudioDatabase();
-		db.AudioClips.Clear();
-		db.ClipTypes.Clear();
+		db.Clear();
 
 		var sb = new StringBuilder();
 		sb.AppendLine("// Auto Generated File, Don't Modify");
@@ -131,12 +143,12 @@ public class AudioPostProcessor : AssetPostprocessor
 			var directory = Path.GetDirectoryName(path);
 			var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
 			var bytes = Encoding.ASCII.GetBytes(g);
-			var id = BitConverter.ToUInt64(bytes,0);
+			var id = BitConverter.ToUInt64(bytes, 0);
 			sb.AppendLine($"\t{name} = {id},");
 			directory = directory.Substring(directory.LastIndexOf('\\') + 1);
 			if (directory == "Resources")
 				directory = "Default";
-			db.AudioClips.Add((AudioClips)id, new AudioClipData(clip, (SoundType)Enum.Parse(typeof(SoundType), directory)));
+			db.Add(id, clip, (SoundType)Enum.Parse(typeof(SoundType), directory));
 		}
 
 		sb.Remove(sb.Length - 3, 1);
@@ -146,6 +158,8 @@ public class AudioPostProcessor : AssetPostprocessor
 		File.WriteAllText(dataPath, sb.ToString());
 		AssetDatabase.SaveAssets();
 		AssetDatabase.ImportAsset(@"Assets/Scripts/Utilities/AudioClips.cs");
+		EditorUtility.SetDirty(db);
+		AssetDatabase.Refresh();
 	}
 
 
