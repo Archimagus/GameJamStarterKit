@@ -4,15 +4,9 @@ using System.Linq;
 using UnityEngine;
 public class MenuStack : ScriptableObject
 {
-	private GameTime _gameTime;
-	private Stack<MenuStackItem> _menus = new Stack<MenuStackItem>();
+	[SerializeField] private GameTime _gameTime;
+	[SerializeField] private Stack<MenuStackItem> _menus = new Stack<MenuStackItem>();
 	
-	private void Awake()
-	{
-		_gameTime = Resources.Load<GameTime>("GameTime");
-		if (_gameTime == null)
-			Debug.LogError("GameTime not found");
-	}
 	public void OpenMenu(GameObject menu)
 	{
 		OpenMenu(menu, true);

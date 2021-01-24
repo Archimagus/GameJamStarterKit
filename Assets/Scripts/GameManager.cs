@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-	private GameTime _gameTime;
-	private MenuStack _menuStack;
+	[SerializeField] private GameTime _gameTime;
+	[SerializeField] private MenuStack _menuStack;
 	public static GameManager Instance { get; private set; }
 	private void Awake()
 	{
@@ -15,11 +15,9 @@ public class GameManager : MonoBehaviour
 		}
 		Instance = this;
 
-		_gameTime = Resources.Load<GameTime>("GameTime");
 		if (_gameTime == null)
 			Debug.LogError("GameTime not found");
 
-		_menuStack = Resources.Load<MenuStack>("MenuStack");
 		if (_menuStack == null)
 			Debug.LogError("MenuStack not found");
 	}

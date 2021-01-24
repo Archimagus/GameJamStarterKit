@@ -56,6 +56,7 @@ AudioMixerGroupController:
   - {fileID: 243617396078782370}
   m_Volume: dbf9614dd13cc2244842ee8c10f52caa
   m_Pitch: 4fdb5eb572f0aaf408abacfdb22888a2
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 24400004}
   m_UserColorIndex: 8
@@ -82,10 +83,16 @@ AudioMixerSnapshotController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Snapshot
+  m_Name: Default
   m_AudioMixer: {fileID: 24100000}
   m_SnapshotID: fe534c54b9d7e5f4fa2a91e452ca704b
-  m_FloatValues: {}
+  m_FloatValues:
+    60351a28ac39ee44d9be9ee4cc948694: -80
+    239f51ba6e3fba44c95f9055304d0781: -80
+    dc55d1db5b1153348870e02ebfb9691e: -80
+    5f1be8bc190673247bc20736a6a19bb2: -80
+    dbf9614dd13cc2244842ee8c10f52caa: -80
+    70d5f98f61238c146bbb6b8bb20c02df: -80
   m_TransitionOverrides: {}
 --- !u!243 &243116335883353770
 AudioMixerGroupController:
@@ -99,6 +106,7 @@ AudioMixerGroupController:
   m_Children: []
   m_Volume: dc55d1db5b1153348870e02ebfb9691e
   m_Pitch: be7897c4620a18342b3f51ee144a465e
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 244595946174598040}
   m_UserColorIndex: 6
@@ -117,6 +125,7 @@ AudioMixerGroupController:
   m_Children: []
   m_Volume: 5f1be8bc190673247bc20736a6a19bb2
   m_Pitch: f10866144abd3ff4688189b4d0a58e64
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 244018279048236034}
   m_UserColorIndex: 2
@@ -135,6 +144,7 @@ AudioMixerGroupController:
   m_Children: []
   m_Volume: 70d5f98f61238c146bbb6b8bb20c02df
   m_Pitch: 6735d4ffe478cb04a84e97cf44d25cb9
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 244808995684816920}
   m_UserColorIndex: 5
@@ -153,6 +163,7 @@ AudioMixerGroupController:
   m_Children: []
   m_Volume: 60351a28ac39ee44d9be9ee4cc948694
   m_Pitch: 1afbe284cb60d6b46959ba4000f48335
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 244444135947426560}
   m_UserColorIndex: 3
@@ -171,6 +182,7 @@ AudioMixerGroupController:
   m_Children: []
   m_Volume: 239f51ba6e3fba44c95f9055304d0781
   m_Pitch: a9275e10414e190458fe946237a3e4a2
+  m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 244002170684678000}
   m_UserColorIndex: 1

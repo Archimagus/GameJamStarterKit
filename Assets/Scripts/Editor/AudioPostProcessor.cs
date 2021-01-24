@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class AudioPostProcessor : AssetPostprocessor
 {
-	static readonly string audioDatabasePath = $"Assets/Audio/Resources/AudioDatabase.asset";
+	static readonly string audioDatabasePath = $"Assets/ScriptableObjects/Utilities/AudioDatabase.asset";
 	static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
 		var db = CreateOrGetAudioDatabase();
@@ -168,8 +168,11 @@ public class AudioPostProcessor : AssetPostprocessor
 		var db = AssetDatabase.LoadAssetAtPath<AudioDatabase>(audioDatabasePath);
 		if (db == null)
 		{
+
+			Debug.LogError("Unable to load Audio Database.  Creating a new one.");
 			db = ScriptableObject.CreateInstance<AudioDatabase>();
 			AssetDatabase.CreateAsset(db, audioDatabasePath);
+			AssetDatabase.SaveAssets();
 		}
 		return db;
 	}

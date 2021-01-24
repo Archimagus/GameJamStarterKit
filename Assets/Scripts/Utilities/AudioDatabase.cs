@@ -48,12 +48,6 @@ public class AudioDatabase : ScriptableObject, ISerializationCallbackReceiver
 
 	public void OnAfterDeserialize()
 	{
-		if ((_audioClips?.Length ?? 0) == 0)
-		{
-			Debug.LogError("Would have cleard the datadabase");
-			return;
-		}
-
 		AudioClips.Clear();
 		ClipTypes.Clear();
 		for (int i = 0; i < _audioClips.Length; i++)

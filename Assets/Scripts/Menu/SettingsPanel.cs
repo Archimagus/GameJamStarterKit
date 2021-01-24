@@ -3,11 +3,10 @@
 public class SettingsPanel : MonoBehaviour
 {
 	[SerializeField] private GameObject _mainPanel = null;
-	private MenuStack _menuStack;
+	[SerializeField] private MenuStack _menuStack = null;
 
 	private void Awake()
 	{
-		_menuStack = Resources.Load<MenuStack>("MenuStack");
 		if (_menuStack == null)
 			Debug.LogError("MenuStack not found");
 	}

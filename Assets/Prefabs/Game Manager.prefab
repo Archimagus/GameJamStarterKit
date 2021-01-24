@@ -43,3 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf17dd0d985daff4287010545062f0b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _gameTime: {fileID: 11400000, guid: 5a6be3cf8071f5447ae91e49006a5f51, type: 2}
+  _menuStack: {fileID: 11400000, guid: 3441b58822eb5744a8128ccead000674, type: 2}

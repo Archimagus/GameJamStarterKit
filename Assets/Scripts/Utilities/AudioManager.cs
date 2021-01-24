@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Audio;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
 public enum SoundType
@@ -40,6 +43,8 @@ public static class AudioManager
 	private static float _fadeTime = 1;
 	private static float _fadeStartTime = 0;
 
+	public static bool IsInitialized => (AudioMissing != null && AudioDatabase != null && Mixer != null);
+
 	static AudioManager()
 	{
 		_gameObject = new GameObject();
@@ -47,23 +52,58 @@ public static class AudioManager
 
 		Object.DontDestroyOnLoad(_gameObject);
 
-		LoadResources();
+		Addressables.LoadAssetAsync<AudioClip>("audiomissing").Completed += (am) =>
+		{
+			if (am.Status == AsyncOperationStatus.Failed)
+				Debug.LogError("Cant Load audiomissing");
+			if (am.IsDone)
+				AudioMissing = am.Result; 
+		};
+		Addressables.LoadAssetAsync<AudioDatabase>("AudioDatabase").Completed += (ad) =>
+		{
+			if (ad.Status == AsyncOperationStatus.Failed)
+				Debug.LogError("Cant Load AudioDatabase");
+			if (ad.IsDone) 
+				AudioDatabase = ad.Result; 
+		};
+
+		var mrEvent = Addressables.LoadAssetAsync<AudioMixer>("Master.mixer");
 
 		_currentMusicSource = _gameObject.AddComponent<AudioSource>();
 		_currentMusicSource.loop = true;
-		_currentMusicSource.outputAudioMixerGroup = MusicMixerGroup;
-
 		_nextMusicSource = _gameObject.AddComponent<AudioSource>();
 		_nextMusicSource.loop = true;
-		_nextMusicSource.outputAudioMixerGroup = MusicMixerGroup;
-
 		_crossfader = _gameObject.AddComponent<CrossFader>();
 		_crossfader.StartCoroutine(CrossfadeMusic());
+
+
+		mrEvent.Completed += (mr) =>
+		{
+			if (mr.Status == AsyncOperationStatus.Failed)
+				Debug.LogError("Cant Load Master.mixer");
+			if (mr.IsDone)
+			{
+				var mixer = mr.Result;
+				MasterMixerGroup = mixer.FindMatchingGroups("Master").First();
+				MusicMixerGroup = mixer.FindMatchingGroups("Music").First();
+				EffectsMixerGroup = mixer.FindMatchingGroups("Effects").First();
+				AmbienceMixerGroup = mixer.FindMatchingGroups("Ambiance").First();
+				InterfaceMixerGroup = mixer.FindMatchingGroups("Interface").First();
+				DialogueMixerGroup = mixer.FindMatchingGroups("Dialogue").First();
+
+				_currentMusicSource.outputAudioMixerGroup = MusicMixerGroup;
+				_nextMusicSource.outputAudioMixerGroup = MusicMixerGroup;
+
+				Mixer = mixer;
+				ResetVolumes();
+			}
+		};
+
 	}
 
 	public static float MasterVolume
 	{
-		get { return PlayerPrefs.GetFloat("masterVolume", 0.75f).toLin(); }
+		get { return PlayerPrefs.GetFloat("masterVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
@@ -75,7 +115,7 @@ public static class AudioManager
 
 	public static float SoundEffectsVolume
 	{
-		get { return PlayerPrefs.GetFloat("effectsVolume", 1.0f).toLin(); }
+		get { return PlayerPrefs.GetFloat("effectsVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
@@ -85,7 +125,7 @@ public static class AudioManager
 	}
 	public static float AmbienceVolume
 	{
-		get { return PlayerPrefs.GetFloat("ambianceVolume", 1.0f).toLin(); }
+		get { return PlayerPrefs.GetFloat("ambianceVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
@@ -95,7 +135,7 @@ public static class AudioManager
 	}
 	public static float MusicVolume
 	{
-		get { return PlayerPrefs.GetFloat("musicVolume", 0.5f).toLin(); }
+		get { return PlayerPrefs.GetFloat("musicVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
@@ -105,7 +145,7 @@ public static class AudioManager
 	}
 	public static float InterfaceVolume
 	{
-		get { return PlayerPrefs.GetFloat("interfaceVolume", 1.0f).toLin(); }
+		get { return PlayerPrefs.GetFloat("interfaceVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
@@ -115,27 +155,13 @@ public static class AudioManager
 	}
 	public static float DialogueVolume
 	{
-		get { return PlayerPrefs.GetFloat("dialogueVolume", 1.0f).toLin(); }
+		get { return PlayerPrefs.GetFloat("dialogueVolume", 0.5f.todB()).toLin(); }
 		set
 		{
 			var vol = value.todB();
 			PlayerPrefs.SetFloat("dialogueVolume", vol);
 			Mixer.SetFloat("dialogueVolume", vol);
 		}
-	}
-
-	private static void LoadResources()
-	{
-		Mixer = Resources.Load<AudioMixer>("Master");
-		MasterMixerGroup = Mixer.FindMatchingGroups("Master").First();
-		MusicMixerGroup = Mixer.FindMatchingGroups("Music").First();
-		EffectsMixerGroup = Mixer.FindMatchingGroups("Effects").First();
-		AmbienceMixerGroup = Mixer.FindMatchingGroups("Ambiance").First();
-		InterfaceMixerGroup = Mixer.FindMatchingGroups("Interface").First();
-		DialogueMixerGroup = Mixer.FindMatchingGroups("Dialogue").First();
-		
-		AudioMissing = Resources.Load<AudioClip>("audiomissing");
-		AudioDatabase = Resources.Load<AudioDatabase>("AudioDatabase");
 	}
 
 	public static void ResetVolumes()
@@ -147,13 +173,25 @@ public static class AudioManager
 		Mixer.SetFloat("musicVolume", MusicVolume.todB());
 		Mixer.SetFloat("dialogueVolume", DialogueVolume.todB());
 	}
+	private static IEnumerator queueAction(Action action)
+	{
+		while(!IsInitialized)
+			yield return null;
+		action();
+	}
 	public static void PlayMusic(AudioClips clip, float fadeTime = 1, bool sync = false)
 	{
-		AudioDatabase.AudioClips.TryGetValue(clip, out AudioClipData cd);
+		AudioClipData cd = AudioDatabase[clip];
 		PlayMusic(cd?.Clip, fadeTime);
 	}
 	public static void PlayMusic(AudioClip clip, float fadeTime = 1, bool sync = false)
 	{
+		if (!IsInitialized)
+		{
+			_crossfader.StartCoroutine(queueAction(() => PlayMusic(clip, fadeTime, sync)));
+			return;
+		}
+
 		if (clip == null)
 		{
 			Debug.Log("PlayMusic is trying to play a null audio clip.");
@@ -211,12 +249,18 @@ public static class AudioManager
 	public static void PlaySound(this MonoBehaviour sfxSource, AudioClips clip,
 		SoundType type = SoundType.Default, Vector3? location = null)
 	{
-		AudioDatabase.AudioClips.TryGetValue(clip, out AudioClipData cd);
+		AudioClipData cd = AudioDatabase[clip];
 		PlaySound(sfxSource, cd?.Clip, type==SoundType.Default?cd?.SoundType??type:type, location);
 	}
 	public static void PlaySound(this MonoBehaviour sfxSource, AudioClip clip,
 		SoundType type = SoundType.Default, Vector3? location = null)
 	{
+		if (!IsInitialized)
+		{
+			_crossfader.StartCoroutine(queueAction(() => PlaySound(sfxSource, clip, type, location)));
+			return;
+		}
+
 		if (sfxSource == null)
 		{
 			sfxSource = _crossfader;
@@ -249,7 +293,8 @@ public static class AudioManager
 			source.transform.localPosition = Vector3.zero;
 		}
 		if (type == SoundType.Default)
-			AudioDatabase.ClipTypes.TryGetValue(clip, out type);
+			type = AudioDatabase[clip];
+
 		switch (type)
 		{
 			case SoundType.SoundEffect:
@@ -300,8 +345,4 @@ public static class AudioManager
 
 class CrossFader : MonoBehaviour
 {
-	private void Start()
-	{
-		AudioManager.ResetVolumes();
-	}
 }

@@ -10,19 +10,17 @@ public class MainMenu : MonoBehaviour
 	[SerializeField] private GameObject _mainMenuPanel = null;
 	[SerializeField] private GameObject _settingPanel = null;
 
-	private GameTime _gameTime;
-	private GameData _gamedata;
-	private MenuStack _menuStack;
+	[Header("Scriptable Objects")]
+	[SerializeField] private GameTime _gameTime;
+	[SerializeField] private GameData _gamedata;
+	[SerializeField] private MenuStack _menuStack;
 
 	private void Awake()
 	{
-		_gameTime = Resources.Load<GameTime>("GameTime");
 		if (_gameTime == null)
 			Debug.LogError("GameTime not found");
-		_menuStack = Resources.Load<MenuStack>("MenuStack");
 		if (_menuStack == null)
 			Debug.LogError("MenuStack not found");
-		_gamedata = Resources.Load<GameData>("GameData");
 		if (_gamedata == null)
 			Debug.LogError("GameData not found");
 
