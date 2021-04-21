@@ -16,5 +16,5 @@ MonoBehaviour:
     _sceneAsset: {fileID: 102900000, guid: 7d055f314454fde4cb05b90256de891a, type: 3}
     _sceneName: MainMenu
   GameScene:
-    _sceneAsset: {fileID: 102900000, guid: 2a3e6e53707c6bc42a1773469044b194, type: 3}
-    _sceneName: Game
+    _sceneAsset: {fileID: 102900000, guid: d1c3109bdb54ad54c8a2b2838528e640, type: 3}
+    _sceneName: GameScene

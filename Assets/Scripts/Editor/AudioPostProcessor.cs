@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
 public class AudioPostProcessor : AssetPostprocessor
 {
-	static readonly string audioDatabasePath = $"Assets/ScriptableObjects/Utilities/AudioDatabase.asset";
+	static readonly string _audioDatabasePath = $"Assets/ScriptableObjects/Utilities/AudioDatabase.asset";
 	static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
 		var db = CreateOrGetAudioDatabase();
@@ -92,6 +93,7 @@ public class AudioPostProcessor : AssetPostprocessor
 					var path = AssetDatabase.GetAssetPath(clip);
 					var guid = AssetDatabase.AssetPathToGUID(path);
 					var name = Path.GetFileNameWithoutExtension(path);
+					name = fixName(name);
 					var directory = Path.GetDirectoryName(path);
 					directory = directory.Substring(directory.LastIndexOf('\\') + 1);
 					if (directory == "Resources")
@@ -124,11 +126,18 @@ public class AudioPostProcessor : AssetPostprocessor
 
 	}
 
+	private static string fixName(string name)
+	{
+		name = Regex.Replace(name, @"[^\w]", "_");
+		if (char.IsDigit(name[0]))
+			name = "A_" + name;
+		return name;
+	}
 
 	[MenuItem("Tools/Fix AudioClips")]
 	private static void FixAudioClips()
 	{
-		string[] guids = AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio/Resources" });
+		string[] guids = AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio" });
 		var db = CreateOrGetAudioDatabase();
 		db.Clear();
 
@@ -140,6 +149,7 @@ public class AudioPostProcessor : AssetPostprocessor
 		{
 			var path = AssetDatabase.GUIDToAssetPath(g);
 			var name = Path.GetFileNameWithoutExtension(path);
+			name = fixName(name);
 			var directory = Path.GetDirectoryName(path);
 			var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
 			var bytes = Encoding.ASCII.GetBytes(g);
@@ -165,13 +175,13 @@ public class AudioPostProcessor : AssetPostprocessor
 
 	private static AudioDatabase CreateOrGetAudioDatabase()
 	{
-		var db = AssetDatabase.LoadAssetAtPath<AudioDatabase>(audioDatabasePath);
+		var db = AssetDatabase.LoadAssetAtPath<AudioDatabase>(_audioDatabasePath);
 		if (db == null)
 		{
 
 			Debug.LogError("Unable to load Audio Database.  Creating a new one.");
 			db = ScriptableObject.CreateInstance<AudioDatabase>();
-			AssetDatabase.CreateAsset(db, audioDatabasePath);
+			AssetDatabase.CreateAsset(db, _audioDatabasePath);
 			AssetDatabase.SaveAssets();
 		}
 		return db;
