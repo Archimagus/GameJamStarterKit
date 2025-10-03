@@ -14,10 +14,12 @@ Fast-start Unity starter kit for game jams: prebuilt main menu, pause menu, audi
 ## Quick start
 1) Open the project in Unity (URP is already set up). When prompted, let Unity update the project if needed.
   - TextMesh Pro essentials:
-    - Open the main menu scene.
-    - In the Hierarchy, select `HeaderText` to trigger TMP import; allow importing Essentials.
-    - You may see console errors initially; they usually clear after import.
-    - If button labels don’t appear, restart Unity.
+    - Window->TextMeshPro->Import TMP Essentials.
+    - If that menu isn't there for some reason
+      - Open the main menu scene.
+      - In the Hierarchy, select `HeaderText` to trigger TMP import; allow importing Essentials.
+      - You may see console errors initially; they usually clear after import.
+      - If button labels don’t appear, restart Unity.
 
 2) Scenes
 - Use `Assets/Scenes/MainMenu.unity` and `Assets/Scenes/GameScene.unity` as starting points.
@@ -85,7 +87,7 @@ If it doesn’t update (e.g., after a big VCS change), run: Tools > Fix AudioCli
 ---
 
 ## Scriptable variables
-- >**Note:** This section is inspired by the Unite talk ["Architecting Game Code with Scriptable Objects"](https://youtu.be/raQ3iHhE_Kk?t=926) by Ryan Hipple. For a deeper dive into the pattern and its benefits, see the [Unite 2017 presentation](https://youtu.be/raQ3iHhE_Kk?t=926).
+- >**Note:** This section is inspired by the Unite talk ["Architecting Game Code with Scriptable Objects"](https://youtu.be/raQ3iHhE_Kk) by Ryan Hipple. For a deeper dive into the pattern and its benefits, see the timestamped [Unite 2017 presentation](https://youtu.be/raQ3iHhE_Kk?t=926).
 - **Built-ins**: `BoolVariable`, `IntVariable`, `FloatVariable`, `StringVariable` (see `Assets/Scripts/Variables/`).
 - **References**: `BoolReference`, `IntReference`, etc. In the inspector, click the dropdown to choose:
   - Use Constant (inline value),
@@ -103,6 +105,7 @@ void AddScore(int amount) {
 ---
 
 ## Event system
+- >**Note:** This section was inspired by the same Unite Talk timestamped to ["Event Architecture"](https://youtu.be/raQ3iHhE_Kk?t=1670)
 - **Create events**: Project window > Create > GameEvent. Or, in any inspector field for a `GameEvent`, click the plus button to create one (stored under `Assets/Prefabs/Events/Resources/`).
 - **Listen to events**: Add `GameEventListner` to a GameObject, assign one or more events, then wire the `Response` UnityEvent. The listener passes a `DataVariable` wrapper to your callback.
 - **Raise events**:

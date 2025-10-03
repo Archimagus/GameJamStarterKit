@@ -50,23 +50,23 @@ public class GraphicsSettingsPanel : MonoBehaviour
 		void resolutionButtonClicked(Resolution r, bool state)
 		{
 			if (state)
-				Screen.SetResolution(r.width, r.height, Screen.fullScreenMode, r.refreshRate);
+				Screen.SetResolution(r.width, r.height, Screen.fullScreenMode, r.refreshRateRatio);
 		}
 		var curRes = Screen.currentResolution;
 		var b = Instantiate(_settingsButtonPrefab, parent);
 		b.group = _resolutionOptionsHost;
-		b.GetComponentInChildren<TextMeshProUGUI>().text = $"{curRes.width}X{curRes.height} {curRes.refreshRate}Hz";
+		b.GetComponentInChildren<TextMeshProUGUI>().text = $"{curRes.width}X{curRes.height} {curRes.refreshRateRatio}Hz";
 		b.isOn = true;
 		b.onValueChanged.AddListener((state) => resolutionButtonClicked(curRes, state));
 		foreach (var res in Screen.resolutions)
 		{
 			var r = res;
-			if (r.height == curRes.height && r.width == curRes.width && r.refreshRate == curRes.refreshRate)
+			if (r.height == curRes.height && r.width == curRes.width && r.refreshRateRatio.CompareTo(curRes.refreshRateRatio) == 0)
 				continue;
 			b = Instantiate(_settingsButtonPrefab, parent);
 			b.isOn = false;
 			b.group = _resolutionOptionsHost;
-			b.GetComponentInChildren<TextMeshProUGUI>().text = $"{r.width}X{r.height} {r.refreshRate}Hz";
+			b.GetComponentInChildren<TextMeshProUGUI>().text = $"{r.width}X{r.height}\t{r.refreshRateRatio}Hz";
 			b.onValueChanged.AddListener((state) => resolutionButtonClicked(r, state));
 		}
 	}

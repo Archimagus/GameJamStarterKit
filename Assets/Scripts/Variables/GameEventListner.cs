@@ -4,8 +4,11 @@ using UnityEngine.Events;
 
 public class GameEventListner : MonoBehaviour
 {
+	[Tooltip("The primary event to listen to")]
 	public GameEvent Event;
+	[Tooltip("Additional events to listen to")]
 	public GameEvent[] Events;
+	[Tooltip("The response to the event")]
 	public DataEvent Response;
 	private DataVariable _dataVariable;
 
@@ -16,7 +19,7 @@ public class GameEventListner : MonoBehaviour
 	}
 	private void OnEnable()
 	{
-		if(Event == null)
+		if (Event == null)
 			Debug.LogWarning("No Event", this);
 		Event?.RegisterListner(this);
 		foreach (var e in Events)
