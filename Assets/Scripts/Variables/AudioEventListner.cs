@@ -17,16 +17,12 @@ public class AudioEventListner : GameEventListner
 #endif
 		}
 	}
-	private void blah(DataVariable dv)
-	{
-
-	}
-	public void SetFadeTime (float fadeTime)
+	public void SetFadeTime(float fadeTime)
 	{
 		FadeTime = fadeTime;
 	}
 
-	public void PlayMusic (AudioClip clip)
+	public void PlayMusic(AudioClip clip)
 	{
 		AudioManager.PlayMusic(clip, FadeTime);
 	}
@@ -36,12 +32,12 @@ public class AudioEventListner : GameEventListner
 		AudioManager.PlayMusic(clip, FadeTime, true);
 	}
 
-	public void PlaySound (AudioClip clip)
+	public void PlaySound(AudioClip clip)
 	{
 		AudioManager.PlaySound(this, clip, SoundType.SoundEffect, this.transform.position);
 	}
 
-	public void PlayStinger (AudioClip clip)
+	public void PlayStinger(AudioClip clip)
 	{
 		AudioManager.PlaySound(this, clip, SoundType.Dialogue);
 	}

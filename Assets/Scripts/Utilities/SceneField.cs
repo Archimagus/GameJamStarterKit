@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+/// <summary>
+/// Serializable reference to a scene by asset with implicit conversion to scene name string.
+/// </summary>
 [System.Serializable]
 public class SceneField
 {

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Wrapper ScriptableObject for passing <see cref="EventData"/> through UnityEvents.
+/// </summary>
 public class DataVariable : ScriptableObject
 {
 	public EventData Data;
@@ -22,6 +25,10 @@ public class DataVariable : ScriptableObject
 		return Data.GetEnumerator();
 	}
 }
+/// <summary>
+/// Serializable payload map used when raising <see cref="GameEvent"/>s.
+/// Stores items in a dictionary and serializes via a backing list for the editor.
+/// </summary>
 [System.Serializable]
 public class EventData : IEnumerable, ISerializationCallbackReceiver
 {
@@ -67,6 +74,10 @@ public class EventData : IEnumerable, ISerializationCallbackReceiver
 }
 
 
+/// <summary>
+/// Single typed entry held by <see cref="EventData"/>.
+/// Supports optional int, float, or string values.
+/// </summary>
 [System.Serializable]
 public class EventDataElement
 {
@@ -78,7 +89,7 @@ public class EventDataElement
 	{
 
 	}
-	public EventDataElement(string key, int? intValue=null, float? floatValue = null, string stringValue = null)
+	public EventDataElement(string key, int? intValue = null, float? floatValue = null, string stringValue = null)
 	{
 		Key = key;
 		IntValue = intValue;

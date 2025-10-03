@@ -4,12 +4,21 @@ using UnityEngine.UI;
 
 public class GraphicsSettingsPanel : MonoBehaviour
 {
+	[Tooltip("Toggle prefab used for quality and resolution options.")]
 	[SerializeField] Toggle _settingsButtonPrefab = null;
+	[Tooltip("Parent ToggleGroup that will contain the generated resolution toggles.")]
 	[SerializeField] ToggleGroup _resolutionOptionsHost = null;
+	[Tooltip("Parent ToggleGroup that will contain the generated quality level toggles.")]
 	[SerializeField] ToggleGroup _qualityOptionsHost = null;
+	[Tooltip("Toggle to switch to exclusive full screen mode.")]
 	[SerializeField] Toggle _fullScreenToggle = null;
+	[Tooltip("Toggle to switch to borderless full screen (full screen window) mode.")]
 	[SerializeField] Toggle _borderlessToggle = null;
+	[Tooltip("Toggle to switch to windowed mode.")]
 	[SerializeField] Toggle _windowedToggle = null;
+	/// <summary>
+	/// Populates quality and resolution options and syncs fullscreen toggles.
+	/// </summary>
 	private void OnEnable()
 	{
 		switch (Screen.fullScreenMode)
@@ -42,6 +51,9 @@ public class GraphicsSettingsPanel : MonoBehaviour
 		updateResolutionsDialogue();
 	}
 
+	/// <summary>
+	/// Rebuilds the resolution list based on current display modes and selection.
+	/// </summary>
 	private void updateResolutionsDialogue()
 	{
 		var parent = _resolutionOptionsHost.transform;

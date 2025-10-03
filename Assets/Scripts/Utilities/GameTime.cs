@@ -1,6 +1,9 @@
 ﻿
 using UnityEngine;
 
+/// <summary>
+/// Centralized time scaling and pause state. Adjusts Time.timeScale and fixedDeltaTime safely.
+/// </summary>
 public class GameTime : ScriptableObject
 {
 	private float _timeScale;

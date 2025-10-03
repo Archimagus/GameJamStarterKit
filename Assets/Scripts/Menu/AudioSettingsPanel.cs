@@ -3,11 +3,17 @@ using UnityEngine.UI;
 
 public class AudioSettingsPanel : MonoBehaviour
 {
+	[Tooltip("Controls the overall master volume.")]
 	[SerializeField] private Slider _masterSlider = null;
+	[Tooltip("Controls the music bus volume.")]
 	[SerializeField] private Slider _musicSlider = null;
+	[Tooltip("Controls the sound effects bus volume.")]
 	[SerializeField] private Slider _soundEffectsSlider = null;
+	[Tooltip("Controls the ambience/environment bus volume.")]
 	[SerializeField] private Slider _ambienceSlider = null;
+	[Tooltip("Controls the dialogue/narration bus volume.")]
 	[SerializeField] private Slider _dialogueSlider = null;
+	[Tooltip("Controls the UI/interface bus volume.")]
 	[SerializeField] private Slider _uISlider = null;
 
 	private float _musicVolume;
@@ -82,6 +88,9 @@ public class AudioSettingsPanel : MonoBehaviour
 			AudioManager.InterfaceVolume = value;
 		}
 	}
+	/// <summary>
+	/// Initializes slider values from the saved mixer settings.
+	/// </summary>
 	void OnEnable()
 	{
 		_masterSlider.value = AudioManager.MasterVolume;

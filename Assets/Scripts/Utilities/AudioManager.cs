@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.Audio;
 using Object = UnityEngine.Object;
 
+/// <summary>
+/// Mixer bus classification for routing sounds.
+/// </summary>
 public enum SoundType
 {
 	Default,
@@ -16,6 +19,9 @@ public enum SoundType
 	Dialogue
 }
 
+/// <summary>
+/// Centralized audio system: loads mixer and database, manages volumes, plays music with crossfade, and pools SFX sources.
+/// </summary>
 public static class AudioManager
 {
 	public static AudioMixer Mixer;
@@ -41,6 +47,9 @@ public static class AudioManager
 	private static float _fadeTime = 1;
 	private static float _fadeStartTime = 0;
 
+	/// <summary>
+	/// True if required resources (fallback clip, database, mixer) are loaded.
+	/// </summary>
 	public static bool IsInitialized => (AudioMissing != null && AudioDatabase != null && Mixer != null);
 
 	static AudioManager()
@@ -71,6 +80,9 @@ public static class AudioManager
 		_crossfader.StartCoroutine(CrossfadeMusic());
 	}
 
+	/// <summary>
+	/// Master volume in linear [0..1], persisted to PlayerPrefs and applied to the mixer.
+	/// </summary>
 	public static float MasterVolume
 	{
 		get { return PlayerPrefs.GetFloat("masterVolume", 0.5f.todB()).toLin(); }
@@ -83,6 +95,9 @@ public static class AudioManager
 	}
 
 
+	/// <summary>
+	/// Sound effects bus volume in linear [0..1].
+	/// </summary>
 	public static float SoundEffectsVolume
 	{
 		get { return PlayerPrefs.GetFloat("effectsVolume", 0.5f.todB()).toLin(); }
@@ -93,6 +108,9 @@ public static class AudioManager
 			Mixer.SetFloat("effectsVolume", vol);
 		}
 	}
+	/// <summary>
+	/// Ambience bus volume in linear [0..1].
+	/// </summary>
 	public static float AmbienceVolume
 	{
 		get { return PlayerPrefs.GetFloat("ambianceVolume", 0.5f.todB()).toLin(); }
@@ -103,6 +121,9 @@ public static class AudioManager
 			Mixer.SetFloat("ambianceVolume", vol);
 		}
 	}
+	/// <summary>
+	/// Music bus volume in linear [0..1].
+	/// </summary>
 	public static float MusicVolume
 	{
 		get { return PlayerPrefs.GetFloat("musicVolume", 0.5f.todB()).toLin(); }
@@ -113,6 +134,9 @@ public static class AudioManager
 			Mixer.SetFloat("musicVolume", vol);
 		}
 	}
+	/// <summary>
+	/// Interface/UI bus volume in linear [0..1].
+	/// </summary>
 	public static float InterfaceVolume
 	{
 		get { return PlayerPrefs.GetFloat("interfaceVolume", 0.5f.todB()).toLin(); }
@@ -123,6 +147,9 @@ public static class AudioManager
 			Mixer.SetFloat("interfaceVolume", vol);
 		}
 	}
+	/// <summary>
+	/// Dialogue bus volume in linear [0..1].
+	/// </summary>
 	public static float DialogueVolume
 	{
 		get { return PlayerPrefs.GetFloat("dialogueVolume", 0.5f.todB()).toLin(); }
@@ -134,6 +161,9 @@ public static class AudioManager
 		}
 	}
 
+	/// <summary>
+	/// Reapplies persisted volume values to the mixer.
+	/// </summary>
 	public static void ResetVolumes()
 	{
 		Mixer.SetFloat("masterVolume", MasterVolume.todB());
@@ -143,11 +173,17 @@ public static class AudioManager
 		Mixer.SetFloat("musicVolume", MusicVolume.todB());
 		Mixer.SetFloat("dialogueVolume", DialogueVolume.todB());
 	}
+	/// <summary>
+	/// Plays a music track by enum id with crossfade.
+	/// </summary>
 	public static void PlayMusic(AudioClips clip, float fadeTime = 1, bool sync = false)
 	{
 		AudioClipData cd = AudioDatabase[clip];
 		PlayMusic(cd?.Clip, fadeTime);
 	}
+	/// <summary>
+	/// Plays a music clip with optional crossfade and time sync.
+	/// </summary>
 	public static void PlayMusic(AudioClip clip, float fadeTime = 1, bool sync = false)
 	{
 		if (clip == null)
@@ -177,7 +213,7 @@ public static class AudioManager
 		}
 	}
 
-	private static IEnumerator CrossfadeMusic ()
+	private static IEnumerator CrossfadeMusic()
 	{
 		while (true)
 		{
@@ -204,12 +240,18 @@ public static class AudioManager
 		}
 	}
 
+	/// <summary>
+	/// Plays a sound by enum id via a temporary pooled AudioSource. Optional location routes to 3D spatialization.
+	/// </summary>
 	public static void PlaySound(this MonoBehaviour sfxSource, AudioClips clip,
 		SoundType type = SoundType.Default, Vector3? location = null)
 	{
 		AudioClipData cd = AudioDatabase[clip];
-		PlaySound(sfxSource, cd?.Clip, type==SoundType.Default?cd?.SoundType??type:type, location);
+		PlaySound(sfxSource, cd?.Clip, type == SoundType.Default ? cd?.SoundType ?? type : type, location);
 	}
+	/// <summary>
+	/// Plays a sound clip via a temporary pooled AudioSource. Optional location routes to 3D spatialization.
+	/// </summary>
 	public static void PlaySound(this MonoBehaviour sfxSource, AudioClip clip,
 		SoundType type = SoundType.Default, Vector3? location = null)
 	{
@@ -273,6 +315,9 @@ public static class AudioManager
 		sfxSource.StartCoroutine(requeueSource(source));
 	}
 
+	/// <summary>
+	/// Disables and requeues a temporary AudioSource after playback finishes.
+	/// </summary>
 	private static IEnumerator requeueSource(AudioSource source)
 	{
 		yield return new WaitForSeconds(source.clip.length);
@@ -285,7 +330,7 @@ public static class AudioManager
 	{
 		if (lin <= float.Epsilon)
 			return -80;
-		return Mathf.Log(lin,3) * 20;
+		return Mathf.Log(lin, 3) * 20;
 	}
 
 	private static float toLin(this float db)

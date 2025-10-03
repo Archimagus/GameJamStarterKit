@@ -3,8 +3,12 @@ using UnityEngine.EventSystems;
 
 public class PauseMenu : MonoBehaviour
 {
+	[Tooltip("Root panel that is shown when the game is paused.")]
 	public GameObject PausePanel;
 	public static PauseMenu Instance { get; private set; }
+	/// <summary>
+	/// Ensures a single instance for easy access by other systems.
+	/// </summary>
 	private void Awake()
 	{
 		if (Instance != null && Instance != this)
@@ -14,6 +18,9 @@ public class PauseMenu : MonoBehaviour
 		}
 		Instance = this;
 	}
+	/// <summary>
+	/// Maintains UI selection for controller/keyboard when paused.
+	/// </summary>
 	private void Update()
 	{
 		if (PausePanel.activeInHierarchy)

@@ -1,14 +1,17 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
+/// <summary>
+/// Serialized lookup between stable audio IDs and clips/sound types. Backed by arrays for serialization.
+/// </summary>
 public class AudioDatabase : ScriptableObject, ISerializationCallbackReceiver
 {
 	[Header("Auto Generated, Don't Change")]
-	[ReadOnly] [SerializeField] private AudioClip[] _audioClips = null;
-	[ReadOnly] [SerializeField] private ulong[] _clipIds = null;
-	[ReadOnly] [SerializeField] private SoundType[] _clipTypes = null;
+	[ReadOnly][SerializeField] private AudioClip[] _audioClips = null;
+	[ReadOnly][SerializeField] private ulong[] _clipIds = null;
+	[ReadOnly][SerializeField] private SoundType[] _clipTypes = null;
 
 	private Dictionary<ulong, AudioClipData> AudioClips { get; } = new Dictionary<ulong, AudioClipData>();
 	private Dictionary<AudioClip, SoundType> ClipTypes { get; } = new Dictionary<AudioClip, SoundType>();
@@ -33,6 +36,9 @@ public class AudioDatabase : ScriptableObject, ISerializationCallbackReceiver
 		AudioClips.Remove(id);
 	}
 
+	/// <summary>
+	/// Gets audio clip data by enum id.
+	/// </summary>
 	public AudioClipData this[AudioClips index]
 	{
 		get
@@ -41,6 +47,9 @@ public class AudioDatabase : ScriptableObject, ISerializationCallbackReceiver
 			return data;
 		}
 	}
+	/// <summary>
+	/// Gets the configured sound type for a specific AudioClip.
+	/// </summary>
 	public SoundType this[AudioClip index]
 	{
 		get { return ClipTypes[index]; }
@@ -81,6 +90,9 @@ public class AudioDatabase : ScriptableObject, ISerializationCallbackReceiver
 	}
 }
 
+/// <summary>
+/// Pair of clip and its intended routing type.
+/// </summary>
 public class AudioClipData
 {
 	public AudioClip Clip;
