@@ -87,6 +87,7 @@ namespace Archimagus
 				sceneView.FrameSelected();
 				Selection.activeObject = null;
 			}
+			EditorGUILayout.EndHorizontal();
 		}
 
 		private void RefillScenes()
